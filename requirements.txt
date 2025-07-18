@@ -1,0 +1,8 @@
+# This project currently uses only HTML and JavaScript.
+# Turf.js is loaded via CDN in geo.html (https://unpkg.com/@turf/turf@6.5.0/turf.min.js)
+# No Python dependencies are currently required.
+
+# If a Python backend is added later, packages like Flask or Django may be included below:
+# flask==2.3.2
+# geopy==2.3.0
+# requests==2.31.0
