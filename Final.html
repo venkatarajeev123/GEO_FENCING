@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>📍 Real-Time GPS Tracker with Geo-Fencing</title>
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <!-- Leaflet Draw CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css"/>
+
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    #map {
+      height: 90vh;
+      width: 100%;
+    }
+    h2 {
+      text-align: center;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+
+<body>
+  <h2>📍 Real-Time GPS Tracker with Geo-Fencing</h2>
+  <div id="map"></div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <!-- Leaflet Draw -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+  <!-- Turf.js -->
+  <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
+
+  <script>
+    // 1. Create the map
+    const map = L.map('map').setView([28.6139, 77.2090], 14); // Delhi coordinates
+
+    // 2. Add OpenStreetMap tile layer
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19
+    }).addTo(map);
+
+    // 3. Add marker for testing
+    const marker = L.marker([28.6139, 77.2090]).addTo(map)
+      .bindPopup("📍 Delhi").openPopup();
+
+    // 4. Add drawing controls
+    const drawnItems = new L.FeatureGroup();
+    map.addLayer(drawnItems);
+
+    const drawControl = new L.Control.Draw({
+      draw: {
+        polyline: false,
+        rectangle: false,
+        circle: false,
+        marker: false,
+        circlemarker: false,
+        polygon: {
+          allowIntersection: false,
+          showArea: true
+        }
+      },
+      edit: {
+        featureGroup: drawnItems
+      }
+    });
+    map.addControl(drawControl);
+
+    let currentGeofence = null;
+
+    map.on(L.Draw.Event.CREATED, function (e) {
+      drawnItems.clearLayers(); // only 1 polygon
+      currentGeofence = e.layer;
+      drawnItems.addLayer(currentGeofence);
+      alert("✅ Geofence created!");
+    });
+
+    // 5. Geolocation from browser
+    if (navigator.geolocation) {
+      navigator.geolocation.watchPosition(function(position) {
+        const lat = position.coords.latitude;
+        const lon = position.coords.longitude;
+
+        const currentPoint = turf.point([lon, lat]);
+
+        if (currentGeofence) {
+          const geojson = currentGeofence.toGeoJSON();
+          const isInside = turf.booleanPointInPolygon(currentPoint, geojson);
+
+          alert(isInside 
+            ? "✅ You are INSIDE the geofence." 
+            : "❌ You are OUTSIDE the geofence."
+          );
+        }
+
+        // Update marker
+        if (marker) {
+          marker.setLatLng([lat, lon]).bindPopup("📍 You are here").openPopup();
+        }
+      });
+    } else {
+      alert("Geolocation not supported!");
+    } 
+  </script>
+</body>
+</html>

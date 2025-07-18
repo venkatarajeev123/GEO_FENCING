@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Turf.js Geofence Example</title>
+  <meta charset="utf-8" />
+</head>
+<body>
+  <h2>Geofence Check with Turf.js</h2>
+  <p id="output">Checking...</p>
+
+  <!-- Load Turf.js -->
+  <script src="https://unpkg.com/@turf/turf@6.5.0/turf.min.js"></script>
+
+  <script>
+    // 1. Define your polygon (GeoJSON format: [ [lng, lat], ... ])
+    const geofence = turf.polygon([[
+      [77.2100, 28.6100],
+      [77.2150, 28.6100],
+      [77.2150, 28.6150],
+      [77.2100, 28.6150],
+      [77.2100, 28.6100]  // Must close the loop
+    ]]);
+
+    // 2. Define your test point
+    const point = turf.point([77.2120, 28.6120]);
+
+    // 3. Check if point is inside
+    const isInside = turf.booleanPointInPolygon(point, geofence);
+
+    console.log("Is inside:", isInside);
+    document.getElementById("output").innerText = isInside
+      ? "✅ Point is inside the geofence."
+      : "❌ Point is outside the geofence.";
+  </script>
+</body>
+</html>
